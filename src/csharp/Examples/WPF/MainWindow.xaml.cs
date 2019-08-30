@@ -9,8 +9,10 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
+using Microsoft.Azure.Kinect.BodyTracking;
 using Microsoft.Azure.Kinect.Sensor;
 using Microsoft.Azure.Kinect.Sensor.WPF;
+using static Microsoft.Azure.Kinect.BodyTracking.BodyFrame;
 
 namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
 {
@@ -62,8 +64,8 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                 using (Image transformedDepth = new Image(ImageFormat.Depth16, colorWidth, colorHeight))
                 using (Image outputColorImage = new Image(ImageFormat.ColorBGRA32, colorWidth, colorHeight))
                 using (Transformation transform = device.GetCalibration().CreateTransformation())
+                using (BodyTracker tracker = new BodyTracker(device.GetCalibration()))
                 {
-
                     while (this.running)
                     {
                         if (!Environment.Is64BitProcess)
@@ -140,6 +142,19 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
 
                                 frameCount = 0;
                                 sw.Restart();
+                            }
+
+                            tracker.EnqueueCapture(capture);
+                            using (BodyFrame frame = tracker.PopFrame())
+                            {
+                                for (uint i = 0; i < frame.GetNumBodies(); ++i)
+                                {
+                                    Body body = new Body() { id = frame.GetBodyID(i), skeleton = frame.GetBodySkeleton(i) };
+                                    Joint chest = body.skeleton.joints[(int)Joints.SPINE_CHEST];
+                                    Console.WriteLine($"User {body.id}: ({chest.position.X}, {chest.position.Y}, {chest.position.Z})");
+                                }
+
+                                frame.GetCapture().Dispose();
                             }
                         }
                     }

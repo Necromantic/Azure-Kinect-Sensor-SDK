@@ -182,7 +182,7 @@
         },
         {
             "name": "UWP-x64-Debug-MSBuild",
-            "generator": "Visual Studio 15 2017",
+            "generator": "Visual Studio 15 2017 Win64",
             "configurationType": "Debug",
             "inheritEnvironments": [
                 "msvc_x64_x64"
@@ -195,7 +195,7 @@
         },
         {
             "name": "UWP-x64-Release-MSBuild",
-            "generator": "Visual Studio 15 2017",
+            "generator": "Visual Studio 15 2017 Win64",
             "configurationType": "Release",
             "inheritEnvironments": [
                 "msvc_x64_x64"
