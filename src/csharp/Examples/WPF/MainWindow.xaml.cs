@@ -6,6 +6,7 @@
 //------------------------------------------------------------------------------
 using System;
 using System.Diagnostics;
+using System.Numerics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
@@ -47,7 +48,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                 device.StartCameras(new DeviceConfiguration
                 {
                     ColorFormat = ImageFormat.ColorBGRA32,
-                    ColorResolution = ColorResolution.R1440p,
+                    ColorResolution = ColorResolution.R720p,
                     DepthMode = DepthMode.WFOV_2x2Binned,
                     SynchronizedImagesOnly = true,
                     CameraFPS = FPS.FPS30,
@@ -66,9 +67,11 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                 using (Transformation transform = device.GetCalibration().CreateTransformation())
                 using (BodyTracker tracker = new BodyTracker(device.GetCalibration()))
                 {
+                    tracker.SetTemporalSmoothing(0);
+
                     while (this.running)
                     {
-                        if (!Environment.Is64BitProcess)
+                        //if (!Environment.Is64BitProcess)
                         {
                             // In 32-bit the BitmapSource memory runs out quickly and we can hit OutOfMemoryException.
                             // Force garbage collection in each loop iteration to keep memory in check.
@@ -152,6 +155,9 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                                     Body body = new Body() { id = frame.GetBodyID(i), skeleton = frame.GetBodySkeleton(i) };
                                     Joint chest = body.skeleton.joints[(int)Joints.SPINE_CHEST];
                                     Console.WriteLine($"User {body.id}: ({chest.position.X}, {chest.position.Y}, {chest.position.Z})");
+                                    Vector2? convertedPos = device.GetCalibration().TransformTo2D(chest.position, CalibrationDeviceType.Depth, CalibrationDeviceType.Color);
+                                    if (convertedPos.HasValue)
+                                        Console.WriteLine($"Converted: ({convertedPos.Value.X}, {convertedPos.Value.Y})");
                                 }
 
                                 frame.GetCapture().Dispose();
