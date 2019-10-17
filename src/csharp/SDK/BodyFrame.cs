@@ -38,6 +38,7 @@ namespace Microsoft.Azure.Kinect.BodyTracking
         {
             public Vector3 position;
             public Quaternion orientation;
+            public JointConfidence confidence_level;
         }
 
         public enum Joints
@@ -50,10 +51,16 @@ namespace Microsoft.Azure.Kinect.BodyTracking
             SHOULDER_LEFT,
             ELBOW_LEFT,
             WRIST_LEFT,
+            KHAND_LEFT,
+            HANDTIP_LEFT,
+            THUMB_LEFT,
             CLAVICLE_RIGHT,
             SHOULDER_RIGHT,
             ELBOW_RIGHT,
             WRIST_RIGHT,
+            HAND_RIGHT,
+            HANDTIP_RIGHT,
+            THUMB_RIGHT,
             HIP_LEFT,
             KNEE_LEFT,
             ANKLE_LEFT,
@@ -71,6 +78,14 @@ namespace Microsoft.Azure.Kinect.BodyTracking
             COUNT
         }
 
+        public enum JointConfidence
+        {
+            NONE = 0,
+            LOW,
+            MEDIUM,
+            HIGH,
+            COUNT,
+        }
 
         [StructLayout(LayoutKind.Sequential)]
         [Sensor.Native.NativeReference("k4abt_skeleton_t")]

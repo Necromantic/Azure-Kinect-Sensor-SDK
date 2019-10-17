@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Azure.Kinect.Sensor.Native;
 using static Microsoft.Azure.Kinect.BodyTracking.BodyFrame;
+using static Microsoft.Azure.Kinect.BodyTracking.BodyTracker;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
@@ -531,6 +532,33 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
 
         [NativeReference]
+        [StructLayout(LayoutKind.Sequential)]
+        public struct k4abt_tracker_configuration_t
+        {
+            public k4abt_sensor_orientation_t sensor_orientation;
+            public bool cpu_only_mode;
+        }
+
+        [NativeReference]
+        public enum k4abt_sensor_orientation_t
+        {
+            K4ABT_SENSOR_ORIENTATION_DEFAULT = 0,
+            K4ABT_SENSOR_ORIENTATION_CLOCKWISE90,
+            K4ABT_SENSOR_ORIENTATION_COUNTERCLOCKWISE90,
+            K4ABT_SENSOR_ORIENTATION_FLIP180,
+        }
+
+        [NativeReference]
+        public enum k4abt_joint_confidence_level_t
+        {
+            K4ABT_JOINT_CONFIDENCE_NONE = 0,
+            K4ABT_JOINT_CONFIDENCE_LOW,
+            K4ABT_JOINT_CONFIDENCE_MEDIUM,
+            K4ABT_JOINT_CONFIDENCE_HIGH,
+            K4ABT_JOINT_CONFIDENCE_LEVELS_COUNT,
+        }
+
+        [NativeReference]
         public enum k4abt_joint_id_t
         {
             K4ABT_JOINT_PELVIS = 0,
@@ -541,10 +569,16 @@ namespace Microsoft.Azure.Kinect.Sensor
             K4ABT_JOINT_SHOULDER_LEFT,
             K4ABT_JOINT_ELBOW_LEFT,
             K4ABT_JOINT_WRIST_LEFT,
+            K4ABT_JOINT_HAND_LEFT,
+            K4ABT_JOINT_HANDTIP_LEFT,
+            K4ABT_JOINT_THUMB_LEFT,
             K4ABT_JOINT_CLAVICLE_RIGHT,
             K4ABT_JOINT_SHOULDER_RIGHT,
             K4ABT_JOINT_ELBOW_RIGHT,
             K4ABT_JOINT_WRIST_RIGHT,
+            K4ABT_JOINT_HAND_RIGHT,
+            K4ABT_JOINT_HANDTIP_RIGHT,
+            K4ABT_JOINT_THUMB_RIGHT,
             K4ABT_JOINT_HIP_LEFT,
             K4ABT_JOINT_KNEE_LEFT,
             K4ABT_JOINT_ANKLE_LEFT,
@@ -559,7 +593,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             K4ABT_JOINT_EAR_LEFT,
             K4ABT_JOINT_EYE_RIGHT,
             K4ABT_JOINT_EAR_RIGHT,
-            K4ABT_JOINT_COUNT,
+            K4ABT_JOINT_COUNT
         }
 
         [NativeReference]
@@ -568,6 +602,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             public Vector3 position;
             public Quaternion orientation;
+            public k4abt_joint_confidence_level_t confidence_level;
         }
 
         [NativeReference]
@@ -627,11 +662,17 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         [DllImport("k4abt", CallingConvention = CallingConvention.Cdecl)]
         [NativeReference]
-        public static extern k4a_result_t k4abt_tracker_create([In] ref Calibration sensor_calibration, out k4abt_tracker_t tracker_handle);
+        public static extern k4a_result_t k4abt_tracker_create([In] ref Calibration sensor_calibration, TrackerConfiguration config, out k4abt_tracker_t tracker_handle);
 
         [DllImport("k4abt", CallingConvention = CallingConvention.Cdecl)]
         [NativeReference]
         public static extern void k4abt_tracker_destroy(IntPtr tracker_handle);
+
+        [DllImport("k4abt", CallingConvention = CallingConvention.Cdecl)]
+        [NativeReference]
+        public static extern void k4abt_tracker_set_temporal_smoothing(
+            k4abt_tracker_t tracker_handle,
+            float smoothing_factor);
 
         [DllImport("k4abt", CallingConvention = CallingConvention.Cdecl)]
         [NativeReference]
